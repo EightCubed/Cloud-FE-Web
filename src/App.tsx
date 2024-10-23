@@ -1,10 +1,23 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useState } from "react";
+import reactLogo from "./assets/react.svg";
+import viteLogo from "/vite.svg";
+import "./App.css";
+import { Fetch } from "../utils/fetch";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    temp();
+  }, []);
+
+  const temp = async () => {
+    const res = await Fetch<unknown>({
+      apiRoutes: "showTreeDirectory",
+      method: "get",
+    });
+    console.log(res);
+  };
 
   return (
     <>
@@ -29,7 +42,7 @@ function App() {
         Click on the Vite and React logos to learn more
       </p>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
