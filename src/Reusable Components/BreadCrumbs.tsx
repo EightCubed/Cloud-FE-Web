@@ -12,7 +12,7 @@ const BreadCrumbs = ({ path }: BreadCrumbsProps) => {
     <div>
       {path.map((data) => {
         return (
-          <div onClick={handleOnClick}>
+          <div key={data} onClick={handleOnClick}>
             {data}
             <span>{">"}</span>
           </div>

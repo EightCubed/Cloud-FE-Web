@@ -28,7 +28,10 @@ const DirectoryTree = ({
         treeData.map((entry) => {
           if (entry.file.filetype === "file") {
             return (
-              <div className={cx("fileContainer", "icon-space")}>
+              <div
+                key={entry.file.absolutefilepath}
+                className={cx("fileContainer", "icon-space")}
+              >
                 <File fileData={entry.file} />
               </div>
             );
@@ -37,6 +40,7 @@ const DirectoryTree = ({
               <div
                 onClick={() => handleClick(entry)}
                 className={cx("folderContainer", "icon-space")}
+                key={entry.file.absolutefilepath}
               >
                 <Folder folderData={entry.file} />
               </div>

@@ -15,7 +15,7 @@ const initTreeData: FileNode = {
     filetype: "file",
     absolutefilepath: "",
   },
-  adjacent: [],
+  children: [],
   filepath: "",
 };
 
@@ -25,7 +25,7 @@ const Dashboard = () => {
   const [breadCrumbs, setBreadCrumbs] = useState<string[]>([]);
 
   const [currentFolderParentPath, setCurrentFolderParentPath] =
-    useState<string>("./uploads/");
+    useState<string>("./uploads");
 
   const fetchTreeDirectory = async (path: string) => {
     const res = await Fetch<TreeDirectoryResponse>({
@@ -45,11 +45,34 @@ const Dashboard = () => {
     setCurrentFolderParentPath(folder.file.absolutefilepath);
   };
 
+  const postAddDirectory = async (filePath: string) => {
+    const res = await Fetch<TreeDirectoryResponse>({
+      apiRoutes: "createDirectory",
+      method: "post",
+      data: {
+        directory: filePath,
+      },
+    });
+    console.log(res);
+  };
+
+  const handleFolderAddClick = () => {
+    postAddDirectory(currentFolderParentPath + "/random_name_6");
+    fetchTreeDirectory(currentFolderParentPath);
+  };
+
+  const handleNavigateBack = (parentFilePath: string) => {
+    setCurrentFolderParentPath(parentFilePath);
+  };
+
   console.log("currentFolderParentPath: ", currentFolderParentPath);
+
+  console.log(treeDirectory);
 
   return (
     <div className={cx("dashboardContainer")}>
-      {treeDirectory.adjacent === null && <div>Empty!</div>}
+      {treeDirectory.children === null && <div>Empty!</div>}
+      <div onClick={() => handleNavigateBack(treeDirectory.filepath)}>Back</div>
       <div className={cx("addDocuments")}>
         <div className={cx("fileAdd")}>
           <div className={cx("plusIcon")}>
@@ -57,7 +80,7 @@ const Dashboard = () => {
           </div>
           <div className={cx("plusText")}>File</div>
         </div>
-        <div className={cx("folderAdd")}>
+        <div className={cx("folderAdd")} onClick={handleFolderAddClick}>
           <div className={cx("plusIcon")}>
             <PlusImage />
           </div>
@@ -72,7 +95,7 @@ const Dashboard = () => {
           />
         </div>
         <DirectoryTree
-          treeData={treeDirectory.adjacent}
+          treeData={treeDirectory.children}
           handleFolderClick={handleFolderClick}
           currentFolderParentPath={currentFolderParentPath}
         />

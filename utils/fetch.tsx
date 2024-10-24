@@ -5,7 +5,7 @@ export const BACKEND_URL = "http://localhost:8080/";
 
 type MethodType = "put" | "post" | "get" | "patch" | "delete";
 
-type ApiRoutes = "showTreeDirectory" | "listFiles";
+type ApiRoutes = "showTreeDirectory" | "listFiles" | "createDirectory";
 
 interface FetchType {
   method: MethodType;

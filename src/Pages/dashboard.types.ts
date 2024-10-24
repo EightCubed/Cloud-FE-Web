@@ -6,7 +6,7 @@ export interface FileInfo {
 
 export interface FileNode {
     file: FileInfo;
-    adjacent: FileNode[];
+    children: FileNode[];
     filepath: string;
 }
 
