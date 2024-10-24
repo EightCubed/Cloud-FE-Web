@@ -1,10 +1,11 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 
-const BACKEND_URL = "http://localhost:8080/";
+export const BACKEND_URL = "http://localhost:8080/";
+// export const BACKEND_URL = "http://192.168.29.16:8080/";
 
 type MethodType = "put" | "post" | "get" | "patch" | "delete";
 
-type ApiRoutes = "showTreeDirectory";
+type ApiRoutes = "showTreeDirectory" | "listFiles";
 
 interface FetchType {
   method: MethodType;
@@ -13,6 +14,7 @@ interface FetchType {
   data?: Record<string, any> | FormData;
   bearerToken?: string;
   id?: string;
+  fileName?: string;
   multipartFormData?: boolean;
 }
 
@@ -22,6 +24,7 @@ export async function Fetch<T>({
   data = {},
   //   bearerToken,
   id = "",
+  fileName = "./uploads",
   multipartFormData = false,
 }: FetchType): Promise<T> {
   try {
@@ -41,6 +44,12 @@ export async function Fetch<T>({
       headers,
       data,
     };
+
+    if (fileName) {
+      config.params = {
+        fileName,
+      };
+    }
 
     if (multipartFormData) {
       config.data = data;

@@ -1,0 +1,17 @@
+.directoryTreeContainer {
+  display: flex;
+}
+
+.icon-space {
+  margin: 0 40px;
+}
+
+.folderContainer {
+  width: 150px;
+  height: 150px;
+}
+
+.fileContainer {
+  width: 150px;
+  height: 150px;
+}
