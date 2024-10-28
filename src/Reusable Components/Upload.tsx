@@ -1,10 +1,10 @@
 import UploadIcon from "../assets/UploadIcon";
 
-interface UploadProps {
-  file: unknown;
-}
+// interface UploadProps {
+//   file: unknown;
+// }
 
-const Upload = ({ file }: UploadProps) => {
+const Upload = () => {
   //   const handleFileUpload = () => {
   //     if (selectedFile) {
   //       // Calculate the number of chunks and the size of each chunk
