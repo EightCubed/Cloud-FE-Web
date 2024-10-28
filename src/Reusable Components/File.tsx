@@ -2,6 +2,11 @@ import { useState } from "react";
 import FileImage from "../assets/FileImage";
 import { FileInfo } from "../Pages/dashboard.types";
 import ImageViewer from "./ImageFileViewer";
+import styles from "./file_folder.module.css";
+import classNames from "classnames/bind";
+
+const cx = classNames.bind(styles);
+
 interface FileDataProps {
   fileData: FileInfo;
 }
@@ -15,10 +20,12 @@ const File = ({ fileData }: FileDataProps) => {
   };
 
   return (
-    <div onClick={handleClick}>
+    <div className={cx("container")} onClick={handleClick}>
       {isSelected && <ImageViewer imageUrl={fileData.absolutefilepath} />}
-      <FileImage />
-      {fileData.filename}
+      <div className={cx("fileIconSVG")}>
+        <FileImage />
+      </div>
+      <div className={cx("text")}>{fileData.filename}</div>
     </div>
   );
 };

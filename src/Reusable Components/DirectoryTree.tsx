@@ -17,34 +17,31 @@ const DirectoryTree = ({
   handleFolderClick,
   currentFolderParentPath,
 }: DirectoryTreeProps) => {
-  const handleClick = (file: FileNode) => {
+  const handleClick = (file: FileNode, isFile: boolean) => {
+    if (isFile) return;
     handleFolderClick(file);
     console.log(currentFolderParentPath);
   };
 
   return (
-    <div className={cx("directoryTreeContainer")}>
+    <div className={cx("gridContainer")}>
       {treeData.length !== 0 &&
         treeData.map((entry) => {
-          if (entry.file.filetype === "file") {
-            return (
-              <div
-                key={entry.file.absolutefilepath}
-                className={cx("fileContainer", "icon-space")}
-              >
+          const { filetype, absolutefilepath } = entry.file;
+          const isFile = filetype === "file";
+          return (
+            <div
+              key={absolutefilepath}
+              className={cx("gridItem")}
+              onClick={() => handleClick(entry, isFile)}
+            >
+              {isFile ? (
                 <File fileData={entry.file} />
-              </div>
-            );
-          } else
-            return (
-              <div
-                onClick={() => handleClick(entry)}
-                className={cx("folderContainer", "icon-space")}
-                key={entry.file.absolutefilepath}
-              >
+              ) : (
                 <Folder folderData={entry.file} />
-              </div>
-            );
+              )}
+            </div>
+          );
         })}
     </div>
   );

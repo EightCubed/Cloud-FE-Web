@@ -1,9 +1,11 @@
 .dashboardContainer {
-  width: 100%;
+  /* width: 1800px; */
+  min-height: 100%;
+  margin: 2rem;
 }
 
 .mainArea {
-  display: flex;
+  width: 100%;
 }
 
 .addDocuments {

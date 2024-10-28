@@ -8,6 +8,7 @@ export interface FileNode {
     file: FileInfo;
     children: FileNode[];
     filepath: string;
+    parentdirectory: string;
 }
 
 export interface TreeDirectoryResponse {

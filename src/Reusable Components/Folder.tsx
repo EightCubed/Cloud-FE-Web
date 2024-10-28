@@ -1,5 +1,9 @@
 import FolderImage from "../assets/FolderImage";
 import { FileInfo } from "../Pages/dashboard.types";
+import styles from "./file_folder.module.css";
+import classNames from "classnames/bind";
+
+const cx = classNames.bind(styles);
 
 interface FolderDataProps {
   folderData: FileInfo;
@@ -7,9 +11,11 @@ interface FolderDataProps {
 
 const Folder = ({ folderData }: FolderDataProps) => {
   return (
-    <div>
-      <FolderImage />
-      {folderData.filename}
+    <div className={cx("container")}>
+      <div className={cx("fileIconSVG")}>
+        <FolderImage />
+      </div>
+      <div className={cx("text")}>{folderData.filename}</div>
     </div>
   );
 };

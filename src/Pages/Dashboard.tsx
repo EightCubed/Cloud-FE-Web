@@ -6,6 +6,8 @@ import styles from "./dashboard.module.css";
 import BreadCrumbs from "../Reusable Components/BreadCrumbs";
 import DirectoryTree from "../Reusable Components/DirectoryTree";
 import PlusImage from "../assets/PlusImage";
+import Modal from "../Reusable Components/Modal";
+import { Button } from "@mui/material";
 
 const cx = classNames.bind(styles);
 
@@ -17,6 +19,7 @@ const initTreeData: FileNode = {
   },
   children: [],
   filepath: "",
+  parentdirectory: "",
 };
 
 const Dashboard = () => {
@@ -26,6 +29,8 @@ const Dashboard = () => {
 
   const [currentFolderParentPath, setCurrentFolderParentPath] =
     useState<string>("./uploads");
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const fetchTreeDirectory = async (path: string) => {
     const res = await Fetch<TreeDirectoryResponse>({
@@ -63,37 +68,61 @@ const Dashboard = () => {
 
   const handleNavigateBack = (parentFilePath: string) => {
     setCurrentFolderParentPath(parentFilePath);
+    console.log("parentFilePath", parentFilePath);
   };
 
-  console.log("currentFolderParentPath: ", currentFolderParentPath);
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+  };
 
-  console.log(treeDirectory);
+  const handleModalOpen = () => {
+    setIsModalOpen(true);
+  };
+
+  // console.log("currentFolderParentPath: ", currentFolderParentPath);
+
+  // console.log(treeDirectory);
+
+  console.log(isModalOpen);
 
   return (
     <div className={cx("dashboardContainer")}>
       {treeDirectory.children === null && <div>Empty!</div>}
-      <div onClick={() => handleNavigateBack(treeDirectory.filepath)}>Back</div>
+      <div onClick={() => handleNavigateBack(treeDirectory.parentdirectory)}>
+        Back
+      </div>
       <div className={cx("addDocuments")}>
-        <div className={cx("fileAdd")}>
+        <Button
+          variant="contained"
+          className={cx("fileAdd")}
+          onClick={handleModalOpen}
+        >
           <div className={cx("plusIcon")}>
             <PlusImage />
           </div>
           <div className={cx("plusText")}>File</div>
-        </div>
-        <div className={cx("folderAdd")} onClick={handleFolderAddClick}>
+        </Button>
+        <Button
+          variant="contained"
+          className={cx("folderAdd")}
+          onClick={handleFolderAddClick}
+        >
           <div className={cx("plusIcon")}>
             <PlusImage />
           </div>
           <div className={cx("plusText")}>Folder</div>
-        </div>
+        </Button>
+      </div>
+      <Modal handleModalClose={handleModalClose} isOpen={isModalOpen}>
+        <div>Modal Here!</div>
+      </Modal>
+      <div className={cx("breadCrumbsContainer")}>
+        <BreadCrumbs
+          path={breadCrumbs}
+          // handleFolderClick={handleFolderClick}
+        />
       </div>
       <div className={cx("mainArea")}>
-        <div className={cx("breadCrumbsContainer")}>
-          <BreadCrumbs
-            path={breadCrumbs}
-            // handleFolderClick={handleFolderClick}
-          />
-        </div>
         <DirectoryTree
           treeData={treeDirectory.children}
           handleFolderClick={handleFolderClick}
