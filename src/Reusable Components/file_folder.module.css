@@ -15,3 +15,41 @@
   text-overflow: ellipsis;
   max-height: 20px;
 }
+
+.modalContainer {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  /* width: 1200px; */
+  background-color: white;
+  border: 2px solid #000;
+  box-shadow: 24;
+  padding: 20px;
+  color: black;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+}
+
+.buttonContainer {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.closeButton {
+  justify-content: end;
+  width: 64px;
+  top: -15px;
+  right: -20px;
+}
+
+.emptyDiv {
+  width: 64px;
+}
+
+.fileName {
+  display: flex;
+  justify-self: center;
+}

@@ -12,15 +12,10 @@ interface DirectoryTreeProps {
   currentFolderParentPath: string;
 }
 
-const DirectoryTree = ({
-  treeData,
-  handleFolderClick,
-  currentFolderParentPath,
-}: DirectoryTreeProps) => {
+const DirectoryTree = ({ treeData, handleFolderClick }: DirectoryTreeProps) => {
   const handleClick = (file: FileNode, isFile: boolean) => {
     if (isFile) return;
     handleFolderClick(file);
-    console.log(currentFolderParentPath);
   };
 
   return (

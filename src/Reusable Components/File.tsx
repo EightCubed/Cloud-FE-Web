@@ -1,9 +1,11 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import FileImage from "../assets/FileImage";
 import { FileInfo } from "../Pages/dashboard.types";
-import ImageViewer from "./ImageFileViewer";
 import styles from "./file_folder.module.css";
 import classNames from "classnames/bind";
+import { Button, Modal, Typography } from "@mui/material";
+import { BACKEND_URL } from "../../utils/fetch";
+import CloseIcon from "@mui/icons-material/Close";
 
 const cx = classNames.bind(styles);
 
@@ -12,16 +14,43 @@ interface FileDataProps {
 }
 
 const File = ({ fileData }: FileDataProps) => {
-  const [isSelected, setIsSelected] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
-  const handleClick = () => {
-    setIsSelected(!isSelected);
-    console.log(fileData);
+  const handleFileOpen = () => {
+    setIsOpen(true);
+  };
+
+  const handleFileClose = (e: React.MouseEvent<HTMLElement>) => {
+    e.stopPropagation();
+    setIsOpen(false);
   };
 
   return (
-    <div className={cx("container")} onClick={handleClick}>
-      {isSelected && <ImageViewer imageUrl={fileData.absolutefilepath} />}
+    <div className={cx("container")} onClick={handleFileOpen}>
+      {isOpen && (
+        <Modal
+          open={true}
+          onClose={(e: React.MouseEvent<HTMLElement>) => handleFileClose(e)}
+        >
+          <div className={cx("modalContainer")}>
+            <div className={cx("buttonContainer")}>
+              <div className={cx("emptyDiv")}></div>
+              <Typography className={cx("fileName")}>
+                {fileData.filename}
+              </Typography>
+              <Button onClick={handleFileClose} className={cx("closeButton")}>
+                <CloseIcon />
+              </Button>
+            </div>
+            <img
+              src={BACKEND_URL + fileData.absolutefilepath}
+              alt="File Preview"
+              height={750}
+              width={900}
+            />
+          </div>
+        </Modal>
+      )}
       <div className={cx("fileIconSVG")}>
         <FileImage />
       </div>

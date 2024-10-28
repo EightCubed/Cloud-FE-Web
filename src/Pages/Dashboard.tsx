@@ -6,10 +6,26 @@ import styles from "./dashboard.module.css";
 import BreadCrumbs from "../Reusable Components/BreadCrumbs";
 import DirectoryTree from "../Reusable Components/DirectoryTree";
 import PlusImage from "../assets/PlusImage";
-import Modal from "../Reusable Components/Modal";
-import { Button } from "@mui/material";
+import { Box, Button, Modal, TextField, Typography } from "@mui/material";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 const cx = classNames.bind(styles);
+
+const style = {
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: 400,
+  bgcolor: "background.paper",
+  border: "2px solid #000",
+  boxShadow: 24,
+  p: 4,
+  color: "black",
+  display: "flex",
+  flexDirection: "column",
+  textAlign: "center",
+};
 
 const initTreeData: FileNode = {
   file: {
@@ -24,13 +40,13 @@ const initTreeData: FileNode = {
 
 const Dashboard = () => {
   const [treeDirectory, setTreeDirectory] = useState<FileNode>(initTreeData);
-
   const [breadCrumbs, setBreadCrumbs] = useState<string[]>([]);
-
   const [currentFolderParentPath, setCurrentFolderParentPath] =
     useState<string>("./uploads");
+  const [isFileModalOpen, setIsFileModalOpen] = useState(false);
+  const [isFolderModalOpen, setIsFolderModalOpen] = useState(false);
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [folderName, setFolderName] = useState("");
 
   const fetchTreeDirectory = async (path: string) => {
     const res = await Fetch<TreeDirectoryResponse>({
@@ -62,40 +78,47 @@ const Dashboard = () => {
   };
 
   const handleFolderAddClick = () => {
-    postAddDirectory(currentFolderParentPath + "/random_name_6");
-    fetchTreeDirectory(currentFolderParentPath);
+    postAddDirectory(currentFolderParentPath + "/" + folderName);
+    fetchTreeDirectory(currentFolderParentPath).then(() => {
+      setIsFolderModalOpen(false);
+    });
   };
 
   const handleNavigateBack = (parentFilePath: string) => {
     setCurrentFolderParentPath(parentFilePath);
-    console.log("parentFilePath", parentFilePath);
   };
 
-  const handleModalClose = () => {
-    setIsModalOpen(false);
+  const handleFileModalClose = () => {
+    setIsFileModalOpen(false);
   };
 
-  const handleModalOpen = () => {
-    setIsModalOpen(true);
+  const handleFileModalOpen = () => {
+    setIsFileModalOpen(true);
   };
 
-  // console.log("currentFolderParentPath: ", currentFolderParentPath);
+  const handleFolderModalClose = () => {
+    setIsFolderModalOpen(false);
+  };
 
-  // console.log(treeDirectory);
-
-  console.log(isModalOpen);
+  const handleFolderModalOpen = () => {
+    setIsFolderModalOpen(true);
+  };
 
   return (
     <div className={cx("dashboardContainer")}>
       {treeDirectory.children === null && <div>Empty!</div>}
-      <div onClick={() => handleNavigateBack(treeDirectory.parentdirectory)}>
-        Back
-      </div>
+      <Button
+        onClick={() => handleNavigateBack(treeDirectory.parentdirectory)}
+        variant="contained"
+        color="primary"
+      >
+        <ArrowBackIcon />
+      </Button>
       <div className={cx("addDocuments")}>
         <Button
           variant="contained"
           className={cx("fileAdd")}
-          onClick={handleModalOpen}
+          onClick={handleFileModalOpen}
         >
           <div className={cx("plusIcon")}>
             <PlusImage />
@@ -105,7 +128,7 @@ const Dashboard = () => {
         <Button
           variant="contained"
           className={cx("folderAdd")}
-          onClick={handleFolderAddClick}
+          onClick={handleFolderModalOpen}
         >
           <div className={cx("plusIcon")}>
             <PlusImage />
@@ -113,8 +136,36 @@ const Dashboard = () => {
           <div className={cx("plusText")}>Folder</div>
         </Button>
       </div>
-      <Modal handleModalClose={handleModalClose} isOpen={isModalOpen}>
-        <div>Modal Here!</div>
+      <Modal open={isFileModalOpen} onClose={handleFileModalClose}>
+        <Box sx={style}>
+          <Typography variant="h6" component="h2">
+            File Upload
+          </Typography>
+          <Typography sx={{ mt: 2 }}>
+            Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
+          </Typography>
+        </Box>
+      </Modal>
+      <Modal open={isFolderModalOpen} onClose={handleFolderModalClose}>
+        <Box sx={style}>
+          <Typography variant="h6" component="h2">
+            Create Folder
+          </Typography>
+          <TextField
+            margin="dense"
+            label="Enter name of folder"
+            variant="standard"
+            value={folderName}
+            onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+              setFolderName(event.target.value);
+            }}
+          />
+          <div className={cx("createFolderButton")}>
+            <Button variant="contained" onClick={handleFolderAddClick}>
+              Create
+            </Button>
+          </div>
+        </Box>
       </Modal>
       <div className={cx("breadCrumbsContainer")}>
         <BreadCrumbs

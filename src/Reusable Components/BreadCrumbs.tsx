@@ -20,6 +20,7 @@
 import * as React from "react";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
 import Link from "@mui/material/Link";
+import { Typography } from "@mui/material";
 
 interface BreadCrumbsProps {
   path: string[];
@@ -29,23 +30,20 @@ interface BreadCrumbsProps {
 export default function ActiveLastBreadcrumb({ path }: BreadCrumbsProps) {
   function handleClick(event: React.MouseEvent<HTMLDivElement, MouseEvent>) {
     event.preventDefault();
-    console.info("You clicked a breadcrumb.");
+    console.log();
   }
 
   return (
-    <div role="presentation" onClick={handleClick}>
+    <div role="" onClick={handleClick}>
       <Breadcrumbs aria-label="breadcrumb">
         {path.map((element, idx) => {
-          {
-            console.log(idx, path.length - 1);
-          }
           return (
-            <Link
-              underline="hover"
-              color="inherit"
-              aria-current={idx === path.length - 1 ? "page" : "false"}
-            >
-              {element[0].toUpperCase() + element.slice(1)}
+            <Link underline="hover" color="inherit">
+              <Typography
+                sx={{ color: idx === path.length - 1 ? "text.primary" : "" }}
+              >
+                {element[0].toUpperCase() + element.slice(1)}
+              </Typography>
             </Link>
           );
         })}
