@@ -1,53 +1,51 @@
-// const BreadCrumbs = ({ path }: BreadCrumbsProps) => {
-//   const handleOnClick = () => {
-//     // handleFolderClick();
-//   };
-
-//   return (
-//     <div>
-//       {path.map((data) => {
-//         return (
-//           <div key={data} onClick={handleOnClick}>
-//             {data}
-//             <span>{">"}</span>
-//           </div>
-//         );
-//       })}
-//     </div>
-//   );
-// };
-
 import * as React from "react";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
 import Link from "@mui/material/Link";
 import { Typography } from "@mui/material";
+import { BreadCrumbType, FileInfo, FileNode } from "../Pages/dashboard.types";
 
 interface BreadCrumbsProps {
-  path: string[];
-  //   handleFolderClick: () => void;
+  path: BreadCrumbType[];
+  handleFolderClick: (folder: FileNode) => void;
 }
 
-export default function ActiveLastBreadcrumb({ path }: BreadCrumbsProps) {
-  function handleClick(event: React.MouseEvent<HTMLDivElement, MouseEvent>) {
+export default function ActiveLastBreadcrumb({
+  path,
+  handleFolderClick,
+}: BreadCrumbsProps) {
+  function handleClick(
+    event: React.MouseEvent<HTMLDivElement, MouseEvent>,
+    element: BreadCrumbType,
+  ) {
     event.preventDefault();
-    console.log();
+
+    const fileNode: FileNode = {
+      file: {
+        absolutefilepath: element.absolutePath,
+      } as FileInfo,
+      filepath: element.absolutePath,
+      parentdirectory: "",
+      children: [],
+    };
+
+    handleFolderClick(fileNode);
   }
 
   return (
-    <div role="" onClick={handleClick}>
-      <Breadcrumbs aria-label="breadcrumb">
-        {path.map((element, idx) => {
-          return (
+    <Breadcrumbs aria-label="breadcrumb">
+      {path.map((element, idx) => {
+        return (
+          <div role="" onClick={(e) => handleClick(e, element)}>
             <Link underline="hover" color="inherit">
               <Typography
                 sx={{ color: idx === path.length - 1 ? "text.primary" : "" }}
               >
-                {element[0].toUpperCase() + element.slice(1)}
+                {element.title[0].toUpperCase() + element.title.slice(1)}
               </Typography>
             </Link>
-          );
-        })}
-      </Breadcrumbs>
-    </div>
+          </div>
+        );
+      })}
+    </Breadcrumbs>
   );
 }

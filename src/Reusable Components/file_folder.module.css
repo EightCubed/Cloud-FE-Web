@@ -12,8 +12,10 @@
 
 .text {
   font-weight: 600;
+  max-width: 100%;
+
+  overflow: hidden;
   text-overflow: ellipsis;
-  max-height: 20px;
 }
 
 .modalContainer {

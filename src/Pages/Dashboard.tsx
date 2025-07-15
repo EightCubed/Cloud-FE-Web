@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
 import { Fetch } from "../../utils/fetch";
-import { FileNode, TreeDirectoryResponse } from "./dashboard.types";
+import {
+  BreadCrumbType,
+  FileNode,
+  TreeDirectoryResponse,
+  UploadHandlerResponse,
+} from "./dashboard.types";
 import classNames from "classnames/bind";
 import styles from "./dashboard.module.css";
 import BreadCrumbs from "../Reusable Components/BreadCrumbs";
@@ -8,6 +13,8 @@ import DirectoryTree from "../Reusable Components/DirectoryTree";
 import PlusImage from "../assets/PlusImage";
 import { Box, Button, Modal, TextField, Typography } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import { toast, Toaster } from "sonner";
 
 const cx = classNames.bind(styles);
 
@@ -40,22 +47,61 @@ const initTreeData: FileNode = {
 
 const Dashboard = () => {
   const [treeDirectory, setTreeDirectory] = useState<FileNode>(initTreeData);
-  const [breadCrumbs, setBreadCrumbs] = useState<string[]>([]);
+  const [breadCrumbs, setBreadCrumbs] = useState<BreadCrumbType[]>([]);
   const [currentFolderParentPath, setCurrentFolderParentPath] =
     useState<string>("./uploads");
-  const [isFileModalOpen, setIsFileModalOpen] = useState(false);
-  const [isFolderModalOpen, setIsFolderModalOpen] = useState(false);
+  const [isFileUploadModalOpen, setIsFileUploadModalOpen] = useState(false);
+  const [isFolderUploadModalOpen, setIsFolderUploadModalOpen] = useState(false);
+  const [isCreateFolderModalOpen, setIsCreateFolderModalOpen] = useState(false);
 
   const [folderName, setFolderName] = useState("");
 
   const fetchTreeDirectory = async (path: string) => {
-    const res = await Fetch<TreeDirectoryResponse>({
-      apiRoutes: "listFiles",
-      method: "get",
-      fileName: path,
-    });
-    setTreeDirectory(res.data);
-    setBreadCrumbs(res.path);
+    try {
+      const res = await Fetch<TreeDirectoryResponse>({
+        apiRoutes: "listFiles",
+        method: "get",
+        fileName: path,
+      });
+      setTreeDirectory(res.data);
+      setBreadCrumbs(res.path);
+      console.log("fetching data", path);
+    } catch (err) {
+      console.error("Error fetching directory:", err);
+    }
+  };
+
+  const handleUploadFiles = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    const fileList: File[] = Array.from(files);
+    for (const file of fileList) {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append(
+        "path",
+        currentFolderParentPath +
+          "/" +
+          file.webkitRelativePath.replace(`/${file.name}`, ""),
+      );
+      formData.append("filename", file.name);
+
+      const toastId = toast.loading(`Uploading ${file.name}...`);
+
+      try {
+        await Fetch<UploadHandlerResponse>({
+          apiRoutes: "upload",
+          method: "post",
+          data: formData,
+          multipartFormData: true,
+        });
+        toast.success(`✅ Uploaded: ${file.name}`, { id: toastId });
+        fetchTreeDirectory(currentFolderParentPath);
+      } catch (err) {
+        console.error("Error creating directory:", err);
+      }
+    }
   };
 
   useEffect(() => {
@@ -67,20 +113,24 @@ const Dashboard = () => {
   };
 
   const postAddDirectory = async (filePath: string) => {
-    const res = await Fetch<TreeDirectoryResponse>({
-      apiRoutes: "createDirectory",
-      method: "post",
-      data: {
-        directory: filePath,
-      },
-    });
-    console.log(res);
+    try {
+      const res = await Fetch<TreeDirectoryResponse>({
+        apiRoutes: "createDirectory",
+        method: "post",
+        data: {
+          directory: filePath,
+        },
+      });
+      console.log(res);
+    } catch (err) {
+      console.error("Error creating directory:", err);
+    }
   };
 
   const handleFolderAddClick = () => {
     postAddDirectory(currentFolderParentPath + "/" + folderName);
     fetchTreeDirectory(currentFolderParentPath).then(() => {
-      setIsFolderModalOpen(false);
+      setIsCreateFolderModalOpen(false);
     });
   };
 
@@ -88,25 +138,34 @@ const Dashboard = () => {
     setCurrentFolderParentPath(parentFilePath);
   };
 
-  const handleFileModalClose = () => {
-    setIsFileModalOpen(false);
+  const handleFileUploadModalClose = () => {
+    setIsFileUploadModalOpen(false);
   };
 
-  const handleFileModalOpen = () => {
-    setIsFileModalOpen(true);
+  const handleFileUploadModalOpen = () => {
+    setIsFileUploadModalOpen(true);
   };
 
-  const handleFolderModalClose = () => {
-    setIsFolderModalOpen(false);
+  const handleFolderUploadModalClose = () => {
+    setIsFolderUploadModalOpen(false);
   };
 
-  const handleFolderModalOpen = () => {
-    setIsFolderModalOpen(true);
+  const handleFolderUploadModalOpen = () => {
+    setIsFolderUploadModalOpen(true);
+  };
+
+  const handleCreateFolderModalClose = () => {
+    setIsCreateFolderModalOpen(false);
+  };
+
+  const handleCreateFolderModalOpen = () => {
+    setIsCreateFolderModalOpen(true);
   };
 
   return (
     <div className={cx("dashboardContainer")}>
       {treeDirectory.children === null && <div>Empty!</div>}
+      <Toaster richColors position="top-right" />
       <Button
         onClick={() => handleNavigateBack(treeDirectory.parentdirectory)}
         variant="contained"
@@ -118,35 +177,96 @@ const Dashboard = () => {
         <Button
           variant="contained"
           className={cx("fileAdd")}
-          onClick={handleFileModalOpen}
+          onClick={handleFileUploadModalOpen}
         >
           <div className={cx("plusIcon")}>
             <PlusImage />
           </div>
-          <div className={cx("plusText")}>File</div>
+          <div className={cx("plusText")}>Upload File</div>
+        </Button>
+        <Button
+          variant="contained"
+          className={cx("fileAdd")}
+          onClick={handleFolderUploadModalOpen}
+        >
+          <div className={cx("plusIcon")}>
+            <PlusImage />
+          </div>
+          <div className={cx("plusText")}>Upload Folder</div>
         </Button>
         <Button
           variant="contained"
           className={cx("folderAdd")}
-          onClick={handleFolderModalOpen}
+          onClick={handleCreateFolderModalOpen}
         >
           <div className={cx("plusIcon")}>
             <PlusImage />
           </div>
-          <div className={cx("plusText")}>Folder</div>
+          <div className={cx("plusText")}>Create Folder</div>
         </Button>
       </div>
-      <Modal open={isFileModalOpen} onClose={handleFileModalClose}>
+      <Modal open={isFileUploadModalOpen} onClose={handleFileUploadModalClose}>
         <Box sx={style}>
           <Typography variant="h6" component="h2">
             File Upload
           </Typography>
           <Typography sx={{ mt: 2 }}>
-            Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
+            <Button
+              component="label"
+              role={undefined}
+              variant="contained"
+              tabIndex={-1}
+              startIcon={<CloudUploadIcon />}
+            >
+              Upload files
+              <input
+                type="file"
+                multiple
+                style={{ display: "none" }}
+                onChange={handleUploadFiles}
+              />
+            </Button>
           </Typography>
         </Box>
       </Modal>
-      <Modal open={isFolderModalOpen} onClose={handleFolderModalClose}>
+      <Modal
+        open={isFolderUploadModalOpen}
+        onClose={handleFolderUploadModalClose}
+      >
+        <Box sx={style}>
+          <Typography variant="h6" component="h2">
+            Folder Upload
+          </Typography>
+          <Typography sx={{ mt: 2 }}>
+            <Button
+              component="label"
+              role={undefined}
+              variant="contained"
+              tabIndex={-1}
+              startIcon={<CloudUploadIcon />}
+            >
+              Upload files
+              <input
+                type="file"
+                multiple
+                ref={(ref) => {
+                  if (ref) {
+                    (
+                      ref as HTMLInputElement & { webkitdirectory: boolean }
+                    ).webkitdirectory = true;
+                  }
+                }}
+                style={{ display: "none" }}
+                onChange={handleUploadFiles}
+              />
+            </Button>
+          </Typography>
+        </Box>
+      </Modal>
+      <Modal
+        open={isCreateFolderModalOpen}
+        onClose={handleCreateFolderModalClose}
+      >
         <Box sx={style}>
           <Typography variant="h6" component="h2">
             Create Folder
@@ -168,10 +288,7 @@ const Dashboard = () => {
         </Box>
       </Modal>
       <div className={cx("breadCrumbsContainer")}>
-        <BreadCrumbs
-          path={breadCrumbs}
-          // handleFolderClick={handleFolderClick}
-        />
+        <BreadCrumbs path={breadCrumbs} handleFolderClick={handleFolderClick} />
       </div>
       <div className={cx("mainArea")}>
         <DirectoryTree

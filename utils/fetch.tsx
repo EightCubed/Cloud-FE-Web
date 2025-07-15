@@ -5,7 +5,11 @@ export const BACKEND_URL = "http://localhost:8080/";
 
 type MethodType = "put" | "post" | "get" | "patch" | "delete";
 
-type ApiRoutes = "showTreeDirectory" | "listFiles" | "createDirectory";
+type ApiRoutes =
+  | "showTreeDirectory"
+  | "listFiles"
+  | "createDirectory"
+  | "upload";
 
 interface FetchType {
   method: MethodType;
@@ -52,6 +56,7 @@ export async function Fetch<T>({
     }
 
     if (multipartFormData) {
+      headers["Content-Type"] = "multipart/form-data";
       config.data = data;
     } else {
       headers["Content-Type"] = "application/json";
@@ -60,8 +65,17 @@ export async function Fetch<T>({
 
     const response: AxiosResponse<T> = await axios(config);
     return response.data;
-  } catch (error) {
-    // console.error("Error in Fetch:", error);
-    throw error as string;
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      const errMsg = error.response?.data || error.message;
+      console.error("Axios error:", errMsg);
+      throw errMsg;
+    } else if (error instanceof Error) {
+      console.error("Generic error:", error.message);
+      throw error.message;
+    } else {
+      console.error("Unknown error:", error);
+      throw String(error);
+    }
   }
 }

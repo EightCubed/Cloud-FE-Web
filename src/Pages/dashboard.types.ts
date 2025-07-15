@@ -13,6 +13,16 @@ export interface FileNode {
 
 export interface TreeDirectoryResponse {
     data: FileNode;
-    path: string[];
+    path: BreadCrumbType[];
     message: string;
+}
+
+export interface UploadHandlerResponse {
+    success: boolean;
+    message: string;
+}
+
+export interface BreadCrumbType {
+    title: string;
+    absolutePath: string;
 }
