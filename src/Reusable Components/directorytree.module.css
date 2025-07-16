@@ -24,3 +24,12 @@
   flex-direction: column;
   text-align: center;
 }
+
+.checkbox-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+}
+
+.checkbox {
+}

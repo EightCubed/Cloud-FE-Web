@@ -9,34 +9,10 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
-    children: [
-      {
-        path: "contact",
-        element: <></>,
-      },
-      // {
-      //   element: <AuthLayout />,
-      //   children: [
-      //     {
-      //       path: "login",
-      //       element: <Login />,
-      //       loader: redirectIfUser,
-      //     },
-      //     {
-      //       path: "logout",
-      //       action: logoutUser,
-      //     },
-      //   ],
-      // },
-    ],
   },
   {
     path: "dashboard",
     element: <Dashboard />,
-    // loader: ({ request }) =>
-    //   fetch("/api/dashboard.json", {
-    //     signal: request.signal,
-    //   }),
   },
 ]);
 

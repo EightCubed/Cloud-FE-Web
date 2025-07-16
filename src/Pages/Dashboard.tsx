@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Fetch } from "../../utils/fetch";
 import {
   BreadCrumbType,
+  DeleteHandlerResponse,
   FileNode,
   TreeDirectoryResponse,
   UploadHandlerResponse,
@@ -15,6 +16,7 @@ import { Box, Button, Modal, TextField, Typography } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { toast, Toaster } from "sonner";
+import { Delete } from "@mui/icons-material";
 
 const cx = classNames.bind(styles);
 
@@ -50,9 +52,13 @@ const Dashboard = () => {
   const [breadCrumbs, setBreadCrumbs] = useState<BreadCrumbType[]>([]);
   const [currentFolderParentPath, setCurrentFolderParentPath] =
     useState<string>("./uploads");
-  const [isFileUploadModalOpen, setIsFileUploadModalOpen] = useState(false);
-  const [isFolderUploadModalOpen, setIsFolderUploadModalOpen] = useState(false);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isCreateFolderModalOpen, setIsCreateFolderModalOpen] = useState(false);
+
+  const [isDeletionModeEnabled, setIsDeletionModeEnabled] = useState(false);
+  const [selectedForDeletion, setSelectedForDeletion] = useState<FileNode[]>(
+    [],
+  );
 
   const [folderName, setFolderName] = useState("");
 
@@ -65,7 +71,6 @@ const Dashboard = () => {
       });
       setTreeDirectory(res.data);
       setBreadCrumbs(res.path);
-      console.log("fetching data", path);
     } catch (err) {
       console.error("Error fetching directory:", err);
     }
@@ -77,6 +82,7 @@ const Dashboard = () => {
 
     const fileList: File[] = Array.from(files);
     for (const file of fileList) {
+      if (file.name === ".DS_Store" || file.name.startsWith("._")) continue;
       const formData = new FormData();
       formData.append("file", file);
       formData.append(
@@ -99,6 +105,7 @@ const Dashboard = () => {
         toast.success(`✅ Uploaded: ${file.name}`, { id: toastId });
         fetchTreeDirectory(currentFolderParentPath);
       } catch (err) {
+        toast.error(`Something went wrong: ${err}`, { id: toastId });
         console.error("Error creating directory:", err);
       }
     }
@@ -106,6 +113,8 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchTreeDirectory(currentFolderParentPath);
+    handleDeletionModeDisabled();
+    setSelectedForDeletion([]);
   }, [currentFolderParentPath]);
 
   const handleFolderClick = (folder: FileNode) => {
@@ -121,8 +130,10 @@ const Dashboard = () => {
           directory: filePath,
         },
       });
-      console.log(res);
+      toast.success(`Created folder : ${res.path}`);
+      fetchTreeDirectory(currentFolderParentPath);
     } catch (err) {
+      toast.error(`Something went wrong: ${err}`);
       console.error("Error creating directory:", err);
     }
   };
@@ -134,24 +145,39 @@ const Dashboard = () => {
     });
   };
 
+  const handleDeleteConfirmation = async () => {
+    try {
+      const res = await Fetch<DeleteHandlerResponse>({
+        method: "delete",
+        apiRoutes: "delete",
+        data: { filesToBeDeleted: selectedForDeletion },
+        fileName: currentFolderParentPath,
+      });
+      fetchTreeDirectory(currentFolderParentPath);
+      if (res.failure_count > 0) {
+        toast.error(`Success: ${res.success_count} Fail: ${res.failure_count}`);
+        toast.error(`Failure : ${res.message}`);
+      } else {
+        toast.success(`Success : ${res.message}`);
+      }
+    } catch (err) {
+      toast.error(`Something went wrong: ${err}`);
+      console.error("Error creating directory:", err);
+    }
+    handleDeletionModeDisabled();
+    setSelectedForDeletion([]);
+  };
+
   const handleNavigateBack = (parentFilePath: string) => {
     setCurrentFolderParentPath(parentFilePath);
   };
 
-  const handleFileUploadModalClose = () => {
-    setIsFileUploadModalOpen(false);
+  const handleUploadModalClose = () => {
+    setIsUploadModalOpen(false);
   };
 
-  const handleFileUploadModalOpen = () => {
-    setIsFileUploadModalOpen(true);
-  };
-
-  const handleFolderUploadModalClose = () => {
-    setIsFolderUploadModalOpen(false);
-  };
-
-  const handleFolderUploadModalOpen = () => {
-    setIsFolderUploadModalOpen(true);
+  const handleUploadModalOpen = () => {
+    setIsUploadModalOpen(true);
   };
 
   const handleCreateFolderModalClose = () => {
@@ -160,6 +186,20 @@ const Dashboard = () => {
 
   const handleCreateFolderModalOpen = () => {
     setIsCreateFolderModalOpen(true);
+  };
+
+  const handleToggleDeletionMode = () => {
+    if (isDeletionModeEnabled) {
+      handleDeletionModeDisabled();
+    } else handleDeletionModeEnabled();
+  };
+
+  const handleDeletionModeEnabled = () => {
+    setIsDeletionModeEnabled(true);
+  };
+
+  const handleDeletionModeDisabled = () => {
+    setIsDeletionModeEnabled(false);
   };
 
   return (
@@ -177,22 +217,12 @@ const Dashboard = () => {
         <Button
           variant="contained"
           className={cx("fileAdd")}
-          onClick={handleFileUploadModalOpen}
+          onClick={handleUploadModalOpen}
         >
           <div className={cx("plusIcon")}>
             <PlusImage />
           </div>
-          <div className={cx("plusText")}>Upload File</div>
-        </Button>
-        <Button
-          variant="contained"
-          className={cx("fileAdd")}
-          onClick={handleFolderUploadModalOpen}
-        >
-          <div className={cx("plusIcon")}>
-            <PlusImage />
-          </div>
-          <div className={cx("plusText")}>Upload Folder</div>
+          <div className={cx("plusText")}>Upload</div>
         </Button>
         <Button
           variant="contained"
@@ -204,13 +234,39 @@ const Dashboard = () => {
           </div>
           <div className={cx("plusText")}>Create Folder</div>
         </Button>
+        <Button
+          variant="contained"
+          className={cx("folderAdd")}
+          onClick={handleToggleDeletionMode}
+          color="error"
+        >
+          <div className={cx("deleteIcon")}>
+            <Delete />
+          </div>
+          <div className={cx("plusText")}>
+            {isDeletionModeEnabled ? "Cancel" : "Delete"}
+          </div>
+        </Button>
+        {isDeletionModeEnabled && (
+          <Button
+            variant="contained"
+            className={cx("folderAdd")}
+            onClick={handleDeleteConfirmation}
+            color="warning"
+          >
+            <div className={cx("deleteIcon")}>
+              <Delete />
+            </div>
+            <div className={cx("plusText")}>Confirm Deletion</div>
+          </Button>
+        )}
       </div>
-      <Modal open={isFileUploadModalOpen} onClose={handleFileUploadModalClose}>
+      <Modal open={isUploadModalOpen} onClose={handleUploadModalClose}>
         <Box sx={style}>
           <Typography variant="h6" component="h2">
             File Upload
           </Typography>
-          <Typography sx={{ mt: 2 }}>
+          <Typography sx={{ mt: 2, mb: 10 }}>
             <Button
               component="label"
               role={undefined}
@@ -227,13 +283,6 @@ const Dashboard = () => {
               />
             </Button>
           </Typography>
-        </Box>
-      </Modal>
-      <Modal
-        open={isFolderUploadModalOpen}
-        onClose={handleFolderUploadModalClose}
-      >
-        <Box sx={style}>
           <Typography variant="h6" component="h2">
             Folder Upload
           </Typography>
@@ -245,7 +294,7 @@ const Dashboard = () => {
               tabIndex={-1}
               startIcon={<CloudUploadIcon />}
             >
-              Upload files
+              Upload folder
               <input
                 type="file"
                 multiple
@@ -295,6 +344,9 @@ const Dashboard = () => {
           treeData={treeDirectory.children}
           handleFolderClick={handleFolderClick}
           currentFolderParentPath={currentFolderParentPath}
+          isDeletionModeEnabled={isDeletionModeEnabled}
+          selectedForDeletion={selectedForDeletion}
+          setSelectedForDeletion={setSelectedForDeletion}
         />
       </div>
     </div>

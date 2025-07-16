@@ -26,3 +26,9 @@ export interface BreadCrumbType {
     title: string;
     absolutePath: string;
 }
+
+export interface DeleteHandlerResponse {
+    success_count: number;
+    failure_count: number;
+    message: string
+}

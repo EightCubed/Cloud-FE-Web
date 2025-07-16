@@ -35,7 +35,11 @@ export default function ActiveLastBreadcrumb({
     <Breadcrumbs aria-label="breadcrumb">
       {path.map((element, idx) => {
         return (
-          <div role="" onClick={(e) => handleClick(e, element)}>
+          <div
+            key={element.absolutePath}
+            role=""
+            onClick={(e) => handleClick(e, element)}
+          >
             <Link underline="hover" color="inherit">
               <Typography
                 sx={{ color: idx === path.length - 1 ? "text.primary" : "" }}

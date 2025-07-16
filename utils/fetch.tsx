@@ -9,7 +9,8 @@ type ApiRoutes =
   | "showTreeDirectory"
   | "listFiles"
   | "createDirectory"
-  | "upload";
+  | "upload"
+  | "delete";
 
 interface FetchType {
   method: MethodType;
