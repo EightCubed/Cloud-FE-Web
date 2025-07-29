@@ -11,12 +11,14 @@ import classNames from "classnames/bind";
 import styles from "./dashboard.module.css";
 import BreadCrumbs from "../Reusable Components/BreadCrumbs";
 import DirectoryTree from "../Reusable Components/DirectoryTree";
-import PlusImage from "../assets/PlusImage";
 import { Box, Button, Modal, TextField, Typography } from "@mui/material";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { toast, Toaster } from "sonner";
-import { Delete } from "@mui/icons-material";
+import BackArrowImage from "../assets/BackArrowImage";
+import CreateFolderImage from "../assets/CreateFolderImage";
+import UploadImage from "../assets/UploadImage";
+import DeleteImage from "../assets/DeleteImage";
+import CancelImage from "../assets/Cancelmage";
 
 const cx = classNames.bind(styles);
 
@@ -114,7 +116,6 @@ const Dashboard = () => {
   useEffect(() => {
     fetchTreeDirectory(currentFolderParentPath);
     handleDeletionModeDisabled();
-    setSelectedForDeletion([]);
   }, [currentFolderParentPath]);
 
   const handleFolderClick = (folder: FileNode) => {
@@ -165,7 +166,6 @@ const Dashboard = () => {
       console.error("Error creating directory:", err);
     }
     handleDeletionModeDisabled();
-    setSelectedForDeletion([]);
   };
 
   const handleNavigateBack = (parentFilePath: string) => {
@@ -188,10 +188,12 @@ const Dashboard = () => {
     setIsCreateFolderModalOpen(true);
   };
 
-  const handleToggleDeletionMode = () => {
+  const handleDeleteOrConfirmDelete = () => {
     if (isDeletionModeEnabled) {
-      handleDeletionModeDisabled();
-    } else handleDeletionModeEnabled();
+      handleDeleteConfirmation();
+    } else {
+      handleDeletionModeEnabled();
+    }
   };
 
   const handleDeletionModeEnabled = () => {
@@ -200,6 +202,7 @@ const Dashboard = () => {
 
   const handleDeletionModeDisabled = () => {
     setIsDeletionModeEnabled(false);
+    setSelectedForDeletion([]);
   };
 
   return (
@@ -211,55 +214,43 @@ const Dashboard = () => {
         variant="contained"
         color="primary"
       >
-        <ArrowBackIcon />
+        <BackArrowImage />
       </Button>
-      <div className={cx("addDocuments")}>
-        <Button
-          variant="contained"
-          className={cx("fileAdd")}
-          onClick={handleUploadModalOpen}
-        >
-          <div className={cx("plusIcon")}>
-            <PlusImage />
-          </div>
-          <div className={cx("plusText")}>Upload</div>
-        </Button>
-        <Button
-          variant="contained"
-          className={cx("folderAdd")}
-          onClick={handleCreateFolderModalOpen}
-        >
-          <div className={cx("plusIcon")}>
-            <PlusImage />
-          </div>
-          <div className={cx("plusText")}>Create Folder</div>
-        </Button>
-        <Button
-          variant="contained"
-          className={cx("folderAdd")}
-          onClick={handleToggleDeletionMode}
-          color="error"
-        >
-          <div className={cx("deleteIcon")}>
-            <Delete />
-          </div>
-          <div className={cx("plusText")}>
-            {isDeletionModeEnabled ? "Cancel" : "Delete"}
-          </div>
-        </Button>
-        {isDeletionModeEnabled && (
+      <div className={cx("actionBar")}>
+        <div className={cx("addDocumentsGroup")}>
           <Button
-            variant="contained"
-            className={cx("folderAdd")}
-            onClick={handleDeleteConfirmation}
-            color="warning"
+            variant="outlined"
+            className={cx("fileAdd")}
+            onClick={handleUploadModalOpen}
           >
-            <div className={cx("deleteIcon")}>
-              <Delete />
-            </div>
-            <div className={cx("plusText")}>Confirm Deletion</div>
+            <UploadImage />
           </Button>
-        )}
+          <Button
+            variant="outlined"
+            className={cx("folderAdd")}
+            onClick={handleCreateFolderModalOpen}
+          >
+            <CreateFolderImage />
+          </Button>
+        </div>
+        <div className={cx("deleteButtonGroup")}>
+          {isDeletionModeEnabled && (
+            <Button
+              variant="outlined"
+              className={cx("folderAdd")}
+              onClick={handleDeletionModeDisabled}
+            >
+              <CancelImage />
+            </Button>
+          )}
+          <Button
+            variant="outlined"
+            className={cx("folderAdd")}
+            onClick={handleDeleteOrConfirmDelete}
+          >
+            <DeleteImage />
+          </Button>
+        </div>
       </div>
       <Modal open={isUploadModalOpen} onClose={handleUploadModalClose}>
         <Box sx={style}>

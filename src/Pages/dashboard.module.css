@@ -8,8 +8,23 @@
   width: 100%;
 }
 
-.addDocuments {
+.actionBar {
   display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin: 0 40px;
+}
+
+.addDocumentsGroup {
+  display: flex;
+  min-width: 160px;
+  justify-content: space-between;
+}
+
+.deleteButtonGroup {
+  display: flex;
+  min-width: 160px;
+  justify-content: space-between;
 }
 
 .fileAdd,
