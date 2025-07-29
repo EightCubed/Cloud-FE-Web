@@ -6,6 +6,7 @@ import classNames from "classnames/bind";
 import { Button, Modal, Typography } from "@mui/material";
 import { BACKEND_URL } from "../../utils/fetch";
 import CloseIcon from "@mui/icons-material/Close";
+import FilePreview from "reactjs-file-preview";
 
 const cx = classNames.bind(styles);
 
@@ -42,12 +43,9 @@ const File = ({ fileData }: FileDataProps) => {
                 <CloseIcon />
               </Button>
             </div>
-            <img
-              src={BACKEND_URL + fileData.absolutefilepath}
-              alt="File Preview"
-              height={750}
-              width={900}
-            />
+            <div className={cx("previewContainer")}>
+              <FilePreview preview={BACKEND_URL + fileData.absolutefilepath} />
+            </div>
           </div>
         </Modal>
       )}

@@ -19,11 +19,11 @@
 }
 
 .modalContainer {
-  position: absolute;
+  /* position: absolute;
   top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  /* width: 1200px; */
+  left: 50%; */
+  /* transform: translate(-50%, -50%); */
+  margin: 40px 120px;
   background-color: white;
   border: 2px solid #000;
   box-shadow: 24;
@@ -54,4 +54,8 @@
 .fileName {
   display: flex;
   justify-self: center;
+}
+
+.previewContainer {
+  height: 800px;
 }
