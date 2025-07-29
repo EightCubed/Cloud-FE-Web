@@ -110,6 +110,7 @@ const Dashboard = () => {
         toast.error(`Something went wrong: ${err}`, { id: toastId });
         console.error("Error creating directory:", err);
       }
+      handleUploadModalClose();
     }
   };
 
