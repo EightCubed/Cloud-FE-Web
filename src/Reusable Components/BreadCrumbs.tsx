@@ -2,33 +2,22 @@ import * as React from "react";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
 import Link from "@mui/material/Link";
 import { Typography } from "@mui/material";
-import { BreadCrumbType, FileInfo, FileNode } from "../Pages/dashboard.types";
+import { BreadCrumbType } from "../Pages/dashboard.types";
 
 interface BreadCrumbsProps {
   path: BreadCrumbType[];
-  handleFolderClick: (folder: FileNode) => void;
+  handleBreadCrumbClick: React.Dispatch<React.SetStateAction<string>>;
 }
 
 export default function ActiveLastBreadcrumb({
   path,
-  handleFolderClick,
+  handleBreadCrumbClick,
 }: BreadCrumbsProps) {
   function handleClick(
-    event: React.MouseEvent<HTMLDivElement, MouseEvent>,
+    _: React.MouseEvent<HTMLDivElement, MouseEvent>,
     element: BreadCrumbType,
   ) {
-    event.preventDefault();
-
-    const fileNode: FileNode = {
-      file: {
-        absolutefilepath: element.absolutePath,
-      } as FileInfo,
-      filepath: element.absolutePath,
-      parentdirectory: "",
-      children: [],
-    };
-
-    handleFolderClick(fileNode);
+    handleBreadCrumbClick(element.relativePath);
   }
 
   return (
@@ -36,7 +25,7 @@ export default function ActiveLastBreadcrumb({
       {path.map((element, idx) => {
         return (
           <div
-            key={element.absolutePath}
+            key={element.relativePath}
             role=""
             onClick={(e) => handleClick(e, element)}
           >

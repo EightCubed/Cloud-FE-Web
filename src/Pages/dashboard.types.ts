@@ -24,7 +24,7 @@ export interface UploadHandlerResponse {
 
 export interface BreadCrumbType {
     title: string;
-    absolutePath: string;
+    relativePath: string;
 }
 
 export interface DeleteHandlerResponse {

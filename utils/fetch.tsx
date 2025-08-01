@@ -1,15 +1,11 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 
-export const BACKEND_URL = "https://test.eightcubed.site/api/";
+export const BACKEND_URL = "http://localhost:8080/";
+// export const BACKEND_URL = "https://test.eightcubed.site/api/";
 
 type MethodType = "put" | "post" | "get" | "patch" | "delete";
 
-type ApiRoutes =
-  | "showTreeDirectory"
-  | "listFiles"
-  | "createDirectory"
-  | "upload"
-  | "delete";
+type ApiRoutes = "showTreeDirectory" | "createDirectory" | "upload" | "delete";
 
 interface FetchType {
   method: MethodType;
@@ -28,16 +24,12 @@ export async function Fetch<T>({
   data = {},
   //   bearerToken,
   id = "",
-  fileName = "./uploads",
+  fileName = "Storage",
   multipartFormData = false,
 }: FetchType): Promise<T> {
   try {
     const url = `${BACKEND_URL}${apiRoutes}${id ? `/${id}` : ""}`;
     const headers: Record<string, string> = {};
-
-    // if (protectedRoutes.includes(apiRoutes) && bearerToken) {
-    //   headers["Authorization"] = `Bearer ${bearerToken}`;
-    // }
 
     headers["Content-Type"] = "application/json";
 
@@ -51,7 +43,7 @@ export async function Fetch<T>({
 
     if (fileName) {
       config.params = {
-        fileName,
+        path: fileName,
       };
     }
 

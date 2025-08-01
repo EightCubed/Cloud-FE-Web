@@ -53,7 +53,7 @@ const Dashboard = () => {
   const [treeDirectory, setTreeDirectory] = useState<FileNode>(initTreeData);
   const [breadCrumbs, setBreadCrumbs] = useState<BreadCrumbType[]>([]);
   const [currentFolderParentPath, setCurrentFolderParentPath] =
-    useState<string>("./uploads");
+    useState<string>("Storage");
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isCreateFolderModalOpen, setIsCreateFolderModalOpen] = useState(false);
 
@@ -67,7 +67,7 @@ const Dashboard = () => {
   const fetchTreeDirectory = async (path: string) => {
     try {
       const res = await Fetch<TreeDirectoryResponse>({
-        apiRoutes: "listFiles",
+        apiRoutes: "showTreeDirectory",
         method: "get",
         fileName: path,
       });
@@ -110,7 +110,6 @@ const Dashboard = () => {
         toast.error(`Something went wrong: ${err}`, { id: toastId });
         console.error("Error creating directory:", err);
       }
-      handleUploadModalClose();
     }
   };
 
@@ -329,7 +328,10 @@ const Dashboard = () => {
         </Box>
       </Modal>
       <div className={cx("breadCrumbsContainer")}>
-        <BreadCrumbs path={breadCrumbs} handleFolderClick={handleFolderClick} />
+        <BreadCrumbs
+          path={breadCrumbs}
+          handleBreadCrumbClick={setCurrentFolderParentPath}
+        />
       </div>
       <div className={cx("mainArea")}>
         <DirectoryTree
