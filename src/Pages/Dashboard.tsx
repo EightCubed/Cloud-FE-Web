@@ -26,6 +26,7 @@ import {
 import { CheckBox } from "@mui/icons-material";
 import DeleteImage from "../assets/DeleteImage";
 import DownloadImage from "../assets/DownloadImage";
+import RefreshImage from "../assets/RefreshImage";
 
 const cx = classNames.bind(styles);
 
@@ -247,6 +248,13 @@ const Dashboard = () => {
           color="primary"
         >
           <BackArrowImage />
+        </Button>
+        <Button
+          onClick={() => fetchTreeDirectory(currentFolderParentPath)}
+          variant="contained"
+          color="primary"
+        >
+          <RefreshImage />
         </Button>
         <div className={cx("actionBar")}>
           <div className={cx("addDocumentsGroup")}>
