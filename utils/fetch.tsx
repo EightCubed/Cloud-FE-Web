@@ -15,6 +15,11 @@ type ApiRoutes =
   | "delete"
   | "download";
 
+const accessHeaders = {
+  "CF-Access-Client-Id": CF_ACCESS_CLIENT_ID,
+  "CF-Access-Client-Secret": CF_ACCESS_CLIENT_SECRET,
+};
+
 export async function fetchJson<T>(
   apiRoutes: ApiRoutes,
   method: MethodType = "get",
@@ -27,7 +32,7 @@ export async function fetchJson<T>(
   const config: AxiosRequestConfig = {
     url,
     method,
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...accessHeaders },
     data: data ? JSON.stringify(data) : undefined,
     params,
     responseType: "json",
@@ -49,7 +54,7 @@ export async function uploadFile<T>(
   const config: AxiosRequestConfig = {
     url,
     method: "post",
-    headers: { "Content-Type": "multipart/form-data" },
+    headers: { "Content-Type": "multipart/form-data", ...accessHeaders },
     data: formData,
     params,
     responseType: "json",
@@ -69,10 +74,7 @@ export async function downloadFile(
   const config: AxiosRequestConfig = {
     url,
     method: "get",
-    headers: {
-      "CF-Access-Client-Id": CF_ACCESS_CLIENT_ID || "",
-      "CF-Access-Client-Secret": CF_ACCESS_CLIENT_SECRET || "",
-    },
+    headers: accessHeaders,
     responseType,
     withCredentials: false,
   };
