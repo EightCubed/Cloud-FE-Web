@@ -1,6 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 
+const CF_ACCESS_CLIENT_ID = process.env.REACT_APP_CF_ACCESS_CLIENT_ID || "";
+const CF_ACCESS_CLIENT_SECRET =
+  process.env.REACT_APP_CF_ACCESS_CLIENT_SECRET || "";
+
 export const BACKEND_URL = "https://test.eightcubed.site/api/";
 
 type MethodType = "put" | "post" | "get" | "patch" | "delete";
@@ -65,7 +69,10 @@ export async function downloadFile(
   const config: AxiosRequestConfig = {
     url,
     method: "get",
-    headers: {},
+    headers: {
+      "CF-Access-Client-Id": CF_ACCESS_CLIENT_ID || "",
+      "CF-Access-Client-Secret": CF_ACCESS_CLIENT_SECRET || "",
+    },
     responseType,
     withCredentials: false,
   };
@@ -83,7 +90,10 @@ export async function downloadFolder(
   const config: AxiosRequestConfig = {
     url,
     method: "get",
-    headers: {},
+    headers: {
+      "CF-Access-Client-Id": CF_ACCESS_CLIENT_ID || "",
+      "CF-Access-Client-Secret": CF_ACCESS_CLIENT_SECRET || "",
+    },
     responseType,
     withCredentials: false,
   };
