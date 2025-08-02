@@ -146,6 +146,7 @@ const Dashboard = () => {
     fetchTreeDirectory(currentFolderParentPath).then(() => {
       setIsCreateFolderModalOpen(false);
     });
+    setFolderName("");
   };
 
   const handleDelete = async () => {
@@ -238,144 +239,146 @@ const Dashboard = () => {
   return (
     <div className={cx("dashboardContainer")}>
       {treeDirectory.children === null && <div>Empty!</div>}
-      <Toaster richColors position="top-right" />
-      <Button
-        onClick={() => handleNavigateBack(treeDirectory.parentdirectory)}
-        variant="contained"
-        color="primary"
-      >
-        <BackArrowImage />
-      </Button>
-      <div className={cx("actionBar")}>
-        <div className={cx("addDocumentsGroup")}>
-          <Button
-            variant="outlined"
-            className={cx("fileAdd")}
-            onClick={handleUploadModalOpen}
-          >
-            <UploadImage />
-          </Button>
-          <Button
-            variant="outlined"
-            className={cx("folderAdd")}
-            onClick={handleCreateFolderModalOpen}
-          >
-            <CreateFolderImage />
-          </Button>
-        </div>
-        <div className={cx("actionButtonGroup")}>
-          {!isSelectionModeEnabled && (
+      <div>
+        <Toaster richColors position="top-right" />
+        <Button
+          onClick={() => handleNavigateBack(treeDirectory.parentdirectory)}
+          variant="contained"
+          color="primary"
+        >
+          <BackArrowImage />
+        </Button>
+        <div className={cx("actionBar")}>
+          <div className={cx("addDocumentsGroup")}>
             <Button
-              className={cx("folderAdd")}
-              onClick={handleSelectionModeEnabled}
+              variant="outlined"
+              className={cx("fileAdd")}
+              onClick={handleUploadModalOpen}
             >
-              <CheckBox />
+              <UploadImage />
             </Button>
-          )}
-          {isSelectionModeEnabled && (
             <Button
               variant="outlined"
               className={cx("folderAdd")}
-              onClick={handleSelectionModeDisabled}
+              onClick={handleCreateFolderModalOpen}
             >
-              <CancelImage />
-            </Button>
-          )}
-          {isSelectionModeEnabled && (
-            <Button
-              variant="outlined"
-              className={cx("folderAdd")}
-              onClick={handleDelete}
-            >
-              <DeleteImage />
-            </Button>
-          )}
-          {isSelectionModeEnabled && (
-            <Button
-              variant="outlined"
-              className={cx("folderAdd")}
-              onClick={handleDownloadZip}
-            >
-              <DownloadImage />
-            </Button>
-          )}
-        </div>
-      </div>
-      <Modal open={isUploadModalOpen} onClose={handleUploadModalClose}>
-        <Box sx={style}>
-          <Typography variant="h6" component="h2">
-            File Upload
-          </Typography>
-          <Typography sx={{ mt: 2, mb: 10 }}>
-            <Button
-              component="label"
-              role={undefined}
-              variant="contained"
-              tabIndex={-1}
-              startIcon={<CloudUploadIcon />}
-            >
-              Upload files
-              <input
-                type="file"
-                multiple
-                style={{ display: "none" }}
-                onChange={handleUploadFiles}
-              />
-            </Button>
-          </Typography>
-          <Typography variant="h6" component="h2">
-            Folder Upload
-          </Typography>
-          <Typography sx={{ mt: 2 }}>
-            <Button
-              component="label"
-              role={undefined}
-              variant="contained"
-              tabIndex={-1}
-              startIcon={<CloudUploadIcon />}
-            >
-              Upload folder
-              <input
-                type="file"
-                multiple
-                ref={(ref) => {
-                  if (ref) {
-                    (
-                      ref as HTMLInputElement & { webkitdirectory: boolean }
-                    ).webkitdirectory = true;
-                  }
-                }}
-                style={{ display: "none" }}
-                onChange={handleUploadFiles}
-              />
-            </Button>
-          </Typography>
-        </Box>
-      </Modal>
-      <Modal
-        open={isCreateFolderModalOpen}
-        onClose={handleCreateFolderModalClose}
-      >
-        <Box sx={style}>
-          <Typography variant="h6" component="h2">
-            Create Folder
-          </Typography>
-          <TextField
-            margin="dense"
-            label="Enter name of folder"
-            variant="standard"
-            value={folderName}
-            onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-              setFolderName(event.target.value);
-            }}
-          />
-          <div className={cx("createFolderButton")}>
-            <Button variant="contained" onClick={handleFolderAddClick}>
-              Create
+              <CreateFolderImage />
             </Button>
           </div>
-        </Box>
-      </Modal>
+          <div className={cx("actionButtonGroup")}>
+            {!isSelectionModeEnabled && (
+              <Button
+                className={cx("folderAdd")}
+                onClick={handleSelectionModeEnabled}
+              >
+                <CheckBox />
+              </Button>
+            )}
+            {isSelectionModeEnabled && (
+              <Button
+                variant="outlined"
+                className={cx("folderAdd")}
+                onClick={handleSelectionModeDisabled}
+              >
+                <CancelImage />
+              </Button>
+            )}
+            {isSelectionModeEnabled && (
+              <Button
+                variant="outlined"
+                className={cx("folderAdd")}
+                onClick={handleDelete}
+              >
+                <DeleteImage />
+              </Button>
+            )}
+            {isSelectionModeEnabled && (
+              <Button
+                variant="outlined"
+                className={cx("folderAdd")}
+                onClick={handleDownloadZip}
+              >
+                <DownloadImage />
+              </Button>
+            )}
+          </div>
+        </div>
+        <Modal open={isUploadModalOpen} onClose={handleUploadModalClose}>
+          <Box sx={style}>
+            <Typography variant="h6" component="h2">
+              File Upload
+            </Typography>
+            <Typography sx={{ mt: 2, mb: 10 }}>
+              <Button
+                component="label"
+                role={undefined}
+                variant="contained"
+                tabIndex={-1}
+                startIcon={<CloudUploadIcon />}
+              >
+                Upload files
+                <input
+                  type="file"
+                  multiple
+                  style={{ display: "none" }}
+                  onChange={handleUploadFiles}
+                />
+              </Button>
+            </Typography>
+            <Typography variant="h6" component="h2">
+              Folder Upload
+            </Typography>
+            <Typography sx={{ mt: 2 }}>
+              <Button
+                component="label"
+                role={undefined}
+                variant="contained"
+                tabIndex={-1}
+                startIcon={<CloudUploadIcon />}
+              >
+                Upload folder
+                <input
+                  type="file"
+                  multiple
+                  ref={(ref) => {
+                    if (ref) {
+                      (
+                        ref as HTMLInputElement & { webkitdirectory: boolean }
+                      ).webkitdirectory = true;
+                    }
+                  }}
+                  style={{ display: "none" }}
+                  onChange={handleUploadFiles}
+                />
+              </Button>
+            </Typography>
+          </Box>
+        </Modal>
+        <Modal
+          open={isCreateFolderModalOpen}
+          onClose={handleCreateFolderModalClose}
+        >
+          <Box sx={style}>
+            <Typography variant="h6" component="h2">
+              Create Folder
+            </Typography>
+            <TextField
+              margin="dense"
+              label="Enter name of folder"
+              variant="standard"
+              value={folderName}
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                setFolderName(event.target.value);
+              }}
+            />
+            <div className={cx("createFolderButton")}>
+              <Button variant="contained" onClick={handleFolderAddClick}>
+                Create
+              </Button>
+            </div>
+          </Box>
+        </Modal>
+      </div>
       <div className={cx("breadCrumbsContainer")}>
         <BreadCrumbs
           path={breadCrumbs}
