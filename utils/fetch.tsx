@@ -5,7 +5,7 @@ const CF_ACCESS_CLIENT_ID = process.env.REACT_APP_CF_ACCESS_CLIENT_ID || "";
 const CF_ACCESS_CLIENT_SECRET =
   process.env.REACT_APP_CF_ACCESS_CLIENT_SECRET || "";
 
-export const BACKEND_URL = "https://test.eightcubed.site/api/";
+export const BACKEND_URL = "https://api.eightcubed.site/";
 
 type MethodType = "put" | "post" | "get" | "patch" | "delete";
 type ApiRoutes =
