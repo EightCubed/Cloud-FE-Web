@@ -57,7 +57,7 @@ const File = ({ fileData }: FileDataProps) => {
             </div>
             <div className={cx("previewContainer")}>
               <FilePreview
-                preview={BACKEND_URL + "/files/" + fileData.absolutefilepath}
+                preview={BACKEND_URL + "/files" + fileData.absolutefilepath}
               />
             </div>
             <div className={cx("downloadContainer")}>
