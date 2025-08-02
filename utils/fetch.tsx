@@ -1,11 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 
-const CF_ACCESS_CLIENT_ID = process.env.REACT_APP_CF_ACCESS_CLIENT_ID || "";
-const CF_ACCESS_CLIENT_SECRET =
-  process.env.REACT_APP_CF_ACCESS_CLIENT_SECRET || "";
-
-export const BACKEND_URL = "https://api.eightcubed.site/";
+export const BACKEND_URL = "https://proxy.eightcubed.site/api-proxy/";
 
 type MethodType = "put" | "post" | "get" | "patch" | "delete";
 type ApiRoutes =
@@ -14,11 +10,6 @@ type ApiRoutes =
   | "upload"
   | "delete"
   | "download";
-
-const accessHeaders = {
-  "CF-Access-Client-Id": CF_ACCESS_CLIENT_ID,
-  "CF-Access-Client-Secret": CF_ACCESS_CLIENT_SECRET,
-};
 
 export async function fetchJson<T>(
   apiRoutes: ApiRoutes,
@@ -32,7 +23,7 @@ export async function fetchJson<T>(
   const config: AxiosRequestConfig = {
     url,
     method,
-    headers: { "Content-Type": "application/json", ...accessHeaders },
+    headers: { "Content-Type": "application/json" },
     data: data ? JSON.stringify(data) : undefined,
     params,
     responseType: "json",
@@ -54,7 +45,7 @@ export async function uploadFile<T>(
   const config: AxiosRequestConfig = {
     url,
     method: "post",
-    headers: { "Content-Type": "multipart/form-data", ...accessHeaders },
+    headers: { "Content-Type": "multipart/form-data" },
     data: formData,
     params,
     responseType: "json",
@@ -74,7 +65,7 @@ export async function downloadFile(
   const config: AxiosRequestConfig = {
     url,
     method: "get",
-    headers: accessHeaders,
+    headers: {},
     responseType,
     withCredentials: false,
   };
@@ -92,10 +83,7 @@ export async function downloadFolder(
   const config: AxiosRequestConfig = {
     url,
     method: "get",
-    headers: {
-      "CF-Access-Client-Id": CF_ACCESS_CLIENT_ID || "",
-      "CF-Access-Client-Secret": CF_ACCESS_CLIENT_SECRET || "",
-    },
+    headers: {},
     responseType,
     withCredentials: false,
   };
