@@ -60,7 +60,7 @@ export async function downloadFile(
   id?: string,
   responseType: AxiosRequestConfig["responseType"] = "blob",
 ): Promise<Blob | ArrayBuffer> {
-  const url = `${BACKEND_URL}/files/${id ? `/${id}` : ""}`;
+  const url = `${BACKEND_URL}files${id ? `/${id}` : ""}`;
 
   const config: AxiosRequestConfig = {
     url,
@@ -78,7 +78,7 @@ export async function downloadFolder(
   pathName?: string,
   responseType: AxiosRequestConfig["responseType"] = "blob",
 ): Promise<Blob | ArrayBuffer> {
-  const url = `${BACKEND_URL}/folder/${pathName ? `/${pathName}` : ""}`;
+  const url = `${BACKEND_URL}folder${pathName ? `/${pathName}` : ""}`;
 
   const config: AxiosRequestConfig = {
     url,
