@@ -4,7 +4,7 @@ import { FileInfo } from "../Pages/dashboard.types";
 import styles from "./file_folder.module.css";
 import classNames from "classnames/bind";
 import { Button, Modal, Typography } from "@mui/material";
-import { BACKEND_URL } from "../../utils/fetch";
+import { BACKEND_URL, downloadFile } from "../../utils/fetch";
 import CloseIcon from "@mui/icons-material/Close";
 import FilePreview from "reactjs-file-preview";
 
@@ -26,6 +26,18 @@ const File = ({ fileData }: FileDataProps) => {
     setIsOpen(false);
   };
 
+  const handleDownload = async (filename: string) => {
+    const res = (await downloadFile(fileData.absolutefilepath)) as Blob;
+    const url = window.URL.createObjectURL(res);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", filename);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  };
+
   return (
     <div className={cx("container")} onClick={handleFileOpen}>
       {isOpen && (
@@ -44,7 +56,17 @@ const File = ({ fileData }: FileDataProps) => {
               </Button>
             </div>
             <div className={cx("previewContainer")}>
-              <FilePreview preview={BACKEND_URL + fileData.absolutefilepath} />
+              <FilePreview
+                preview={BACKEND_URL + "/files/" + fileData.absolutefilepath}
+              />
+            </div>
+            <div className={cx("downloadContainer")}>
+              <Button
+                onClick={() => handleDownload(fileData.filename)}
+                variant="contained"
+              >
+                Download
+              </Button>
             </div>
           </div>
         </Modal>

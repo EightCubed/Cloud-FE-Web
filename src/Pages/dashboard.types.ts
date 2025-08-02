@@ -1,6 +1,11 @@
+export enum FileType {
+    FileTypeFile = "file",
+    FileTypeFolder = "folder"
+}
+
 export interface FileInfo {
     filename: string;
-    filetype: "file" | "folder"
+    filetype: FileType
     absolutefilepath: string;
 }
 
@@ -25,10 +30,4 @@ export interface UploadHandlerResponse {
 export interface BreadCrumbType {
     title: string;
     relativePath: string;
-}
-
-export interface DeleteHandlerResponse {
-    success_count: number;
-    failure_count: number;
-    message: string
 }

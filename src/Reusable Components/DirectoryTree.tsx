@@ -11,7 +11,7 @@ interface DirectoryTreeProps {
   treeData: FileNode[];
   handleFolderClick: (file: FileNode) => void;
   currentFolderParentPath: string;
-  isDeletionModeEnabled: boolean;
+  isSelectionModeEnabled: boolean;
   selectedForDeletion: FileNode[];
   setSelectedForDeletion: React.Dispatch<React.SetStateAction<FileNode[]>>;
 }
@@ -19,7 +19,7 @@ interface DirectoryTreeProps {
 const DirectoryTree = ({
   treeData,
   handleFolderClick,
-  isDeletionModeEnabled,
+  isSelectionModeEnabled,
   selectedForDeletion,
   setSelectedForDeletion,
 }: DirectoryTreeProps) => {
@@ -28,7 +28,7 @@ const DirectoryTree = ({
     handleFolderClick(file);
   };
 
-  const handleCheckboxClick = (entry: FileNode) => {
+  const handleCheckboxDelete = (entry: FileNode) => {
     setSelectedForDeletion([...selectedForDeletion, entry]);
   };
 
@@ -42,11 +42,14 @@ const DirectoryTree = ({
             <div key={entry.file.absolutefilepath} className={cx("gridItem")}>
               <div className={cx("checkbox-container")}>
                 <div></div>
-                {isDeletionModeEnabled && (
+                {isSelectionModeEnabled && (
                   <Checkbox
                     className={cx("checkbox")}
-                    onClick={() => handleCheckboxClick(entry)}
+                    onClick={() => handleCheckboxDelete(entry)}
                   />
+                )}
+                {!isSelectionModeEnabled && (
+                  <div className={cx("checkbox")}></div>
                 )}
               </div>
               <div

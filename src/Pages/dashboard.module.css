@@ -1,5 +1,4 @@
 .dashboardContainer {
-  /* width: 1800px; */
   min-height: 100%;
   margin: 2rem;
 }
@@ -21,10 +20,11 @@
   justify-content: space-between;
 }
 
-.deleteButtonGroup {
+.actionButtonGroup {
   display: flex;
-  min-width: 160px;
+  flex-direction: row-reverse;
   justify-content: space-between;
+  min-width: 240px;
 }
 
 .fileAdd,

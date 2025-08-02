@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
-import { Fetch } from "../../utils/fetch";
 import {
   BreadCrumbType,
-  DeleteHandlerResponse,
   FileNode,
+  FileType,
   TreeDirectoryResponse,
   UploadHandlerResponse,
 } from "./dashboard.types";
@@ -17,8 +16,16 @@ import { toast, Toaster } from "sonner";
 import BackArrowImage from "../assets/BackArrowImage";
 import CreateFolderImage from "../assets/CreateFolderImage";
 import UploadImage from "../assets/UploadImage";
-import DeleteImage from "../assets/DeleteImage";
 import CancelImage from "../assets/Cancelmage";
+import {
+  downloadFile,
+  downloadFolder,
+  fetchJson,
+  uploadFile,
+} from "../../utils/fetch";
+import { CheckBox } from "@mui/icons-material";
+import DeleteImage from "../assets/DeleteImage";
+import DownloadImage from "../assets/DownloadImage";
 
 const cx = classNames.bind(styles);
 
@@ -41,7 +48,7 @@ const style = {
 const initTreeData: FileNode = {
   file: {
     filename: "",
-    filetype: "file",
+    filetype: FileType.FileTypeFile,
     absolutefilepath: "",
   },
   children: [],
@@ -57,7 +64,7 @@ const Dashboard = () => {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isCreateFolderModalOpen, setIsCreateFolderModalOpen] = useState(false);
 
-  const [isDeletionModeEnabled, setIsDeletionModeEnabled] = useState(false);
+  const [isSelectionModeEnabled, setIsSelectionModeEnabled] = useState(false);
   const [selectedForDeletion, setSelectedForDeletion] = useState<FileNode[]>(
     [],
   );
@@ -66,11 +73,13 @@ const Dashboard = () => {
 
   const fetchTreeDirectory = async (path: string) => {
     try {
-      const res = await Fetch<TreeDirectoryResponse>({
-        apiRoutes: "showTreeDirectory",
-        method: "get",
-        fileName: path,
-      });
+      const res = await fetchJson<TreeDirectoryResponse>(
+        "showTreeDirectory",
+        "get",
+        undefined,
+        undefined,
+        { path },
+      );
       setTreeDirectory(res.data);
       setBreadCrumbs(res.path);
     } catch (err) {
@@ -88,7 +97,7 @@ const Dashboard = () => {
       const formData = new FormData();
       formData.append("file", file);
       formData.append(
-        "path",
+        "destPath",
         currentFolderParentPath +
           "/" +
           file.webkitRelativePath.replace(`/${file.name}`, ""),
@@ -98,12 +107,7 @@ const Dashboard = () => {
       const toastId = toast.loading(`Uploading ${file.name}...`);
 
       try {
-        await Fetch<UploadHandlerResponse>({
-          apiRoutes: "upload",
-          method: "post",
-          data: formData,
-          multipartFormData: true,
-        });
+        await uploadFile<UploadHandlerResponse>("upload", formData);
         toast.success(`✅ Uploaded: ${file.name}`, { id: toastId });
         fetchTreeDirectory(currentFolderParentPath);
       } catch (err) {
@@ -115,7 +119,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchTreeDirectory(currentFolderParentPath);
-    handleDeletionModeDisabled();
+    handleSelectionModeDisabled();
   }, [currentFolderParentPath]);
 
   const handleFolderClick = (folder: FileNode) => {
@@ -124,13 +128,11 @@ const Dashboard = () => {
 
   const postAddDirectory = async (filePath: string) => {
     try {
-      const res = await Fetch<TreeDirectoryResponse>({
-        apiRoutes: "createDirectory",
-        method: "post",
-        data: {
-          directory: filePath,
-        },
-      });
+      const res = await fetchJson<TreeDirectoryResponse>(
+        "createDirectory",
+        "post",
+        { directory: filePath },
+      );
       toast.success(`Created folder : ${res.path}`);
       fetchTreeDirectory(currentFolderParentPath);
     } catch (err) {
@@ -146,26 +148,62 @@ const Dashboard = () => {
     });
   };
 
-  const handleDeleteConfirmation = async () => {
-    try {
-      const res = await Fetch<DeleteHandlerResponse>({
-        method: "delete",
-        apiRoutes: "delete",
-        data: { filesToBeDeleted: selectedForDeletion },
-        fileName: currentFolderParentPath,
-      });
-      fetchTreeDirectory(currentFolderParentPath);
-      if (res.failure_count > 0) {
-        toast.error(`Success: ${res.success_count} Fail: ${res.failure_count}`);
-        toast.error(`Failure : ${res.message}`);
-      } else {
-        toast.success(`Success : ${res.message}`);
-      }
-    } catch (err) {
-      toast.error(`Something went wrong: ${err}`);
-      console.error("Error creating directory:", err);
+  const handleDelete = async () => {
+    if (selectedForDeletion.length === 0) {
+      handleSelectionModeDisabled();
+      return;
     }
-    handleDeletionModeDisabled();
+    for (const file of selectedForDeletion) {
+      try {
+        const res = await fetchJson<string>("delete", "delete", {
+          file,
+        });
+        fetchTreeDirectory(currentFolderParentPath);
+        toast.success(`Success : ${res}`);
+      } catch (err) {
+        toast.error(`Something went wrong: ${err}`);
+      }
+    }
+    handleSelectionModeDisabled();
+  };
+
+  const handleDownloadZip = async () => {
+    for (const file of selectedForDeletion) {
+      if (file.file.filetype === FileType.FileTypeFile) {
+        try {
+          const res = (await downloadFile(file.filepath)) as Blob;
+          const url = window.URL.createObjectURL(res);
+          const link = document.createElement("a");
+          link.href = url;
+          link.setAttribute("download", file.file.filename);
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          window.URL.revokeObjectURL(url);
+          toast.success(`Downloaded file : ${file.file.filename}`);
+        } catch (err) {
+          toast.error(`Something went wrong: ${err}`);
+          console.error("Error creating directory:", err);
+        }
+      } else {
+        try {
+          const res = (await downloadFolder(file.filepath)) as Blob;
+          const url = window.URL.createObjectURL(res);
+          const link = document.createElement("a");
+          link.href = url;
+          link.setAttribute("download", file.file.filename);
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          window.URL.revokeObjectURL(url);
+          toast.success(`Downloaded zipped folder : ${file.file.filename}`);
+        } catch (err) {
+          toast.error(`Something went wrong: ${err}`);
+          console.error("Error creating directory:", err);
+        }
+      }
+    }
+    handleSelectionModeDisabled();
   };
 
   const handleNavigateBack = (parentFilePath: string) => {
@@ -188,20 +226,12 @@ const Dashboard = () => {
     setIsCreateFolderModalOpen(true);
   };
 
-  const handleDeleteOrConfirmDelete = () => {
-    if (isDeletionModeEnabled) {
-      handleDeleteConfirmation();
-    } else {
-      handleDeletionModeEnabled();
-    }
+  const handleSelectionModeEnabled = () => {
+    setIsSelectionModeEnabled(true);
   };
 
-  const handleDeletionModeEnabled = () => {
-    setIsDeletionModeEnabled(true);
-  };
-
-  const handleDeletionModeDisabled = () => {
-    setIsDeletionModeEnabled(false);
+  const handleSelectionModeDisabled = () => {
+    setIsSelectionModeEnabled(false);
     setSelectedForDeletion([]);
   };
 
@@ -233,23 +263,42 @@ const Dashboard = () => {
             <CreateFolderImage />
           </Button>
         </div>
-        <div className={cx("deleteButtonGroup")}>
-          {isDeletionModeEnabled && (
+        <div className={cx("actionButtonGroup")}>
+          {!isSelectionModeEnabled && (
+            <Button
+              className={cx("folderAdd")}
+              onClick={handleSelectionModeEnabled}
+            >
+              <CheckBox />
+            </Button>
+          )}
+          {isSelectionModeEnabled && (
             <Button
               variant="outlined"
               className={cx("folderAdd")}
-              onClick={handleDeletionModeDisabled}
+              onClick={handleSelectionModeDisabled}
             >
               <CancelImage />
             </Button>
           )}
-          <Button
-            variant="outlined"
-            className={cx("folderAdd")}
-            onClick={handleDeleteOrConfirmDelete}
-          >
-            <DeleteImage />
-          </Button>
+          {isSelectionModeEnabled && (
+            <Button
+              variant="outlined"
+              className={cx("folderAdd")}
+              onClick={handleDelete}
+            >
+              <DeleteImage />
+            </Button>
+          )}
+          {isSelectionModeEnabled && (
+            <Button
+              variant="outlined"
+              className={cx("folderAdd")}
+              onClick={handleDownloadZip}
+            >
+              <DownloadImage />
+            </Button>
+          )}
         </div>
       </div>
       <Modal open={isUploadModalOpen} onClose={handleUploadModalClose}>
@@ -338,7 +387,7 @@ const Dashboard = () => {
           treeData={treeDirectory.children}
           handleFolderClick={handleFolderClick}
           currentFolderParentPath={currentFolderParentPath}
-          isDeletionModeEnabled={isDeletionModeEnabled}
+          isSelectionModeEnabled={isSelectionModeEnabled}
           selectedForDeletion={selectedForDeletion}
           setSelectedForDeletion={setSelectedForDeletion}
         />

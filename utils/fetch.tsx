@@ -1,73 +1,93 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 
 export const BACKEND_URL = "http://localhost:8080/";
-// export const BACKEND_URL = "https://test.eightcubed.site/api/";
 
 type MethodType = "put" | "post" | "get" | "patch" | "delete";
+type ApiRoutes =
+  | "showTreeDirectory"
+  | "createDirectory"
+  | "upload"
+  | "delete"
+  | "download";
 
-type ApiRoutes = "showTreeDirectory" | "createDirectory" | "upload" | "delete";
+export async function fetchJson<T>(
+  apiRoutes: ApiRoutes,
+  method: MethodType = "get",
+  data?: Record<string, any>,
+  id?: string,
+  params?: Record<string, any>,
+): Promise<T> {
+  const url = `${BACKEND_URL}${apiRoutes}${id ? `/${id}` : ""}`;
 
-interface FetchType {
-  method: MethodType;
-  apiRoutes: ApiRoutes;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data?: Record<string, any> | FormData;
-  bearerToken?: string;
-  id?: string;
-  fileName?: string;
-  multipartFormData?: boolean;
+  const config: AxiosRequestConfig = {
+    url,
+    method,
+    headers: { "Content-Type": "application/json" },
+    data: data ? JSON.stringify(data) : undefined,
+    params,
+    responseType: "json",
+    withCredentials: false,
+  };
+
+  const response: AxiosResponse<T> = await axios(config);
+  return response.data;
 }
 
-export async function Fetch<T>({
-  method,
-  apiRoutes,
-  data = {},
-  //   bearerToken,
-  id = "",
-  fileName = "Storage",
-  multipartFormData = false,
-}: FetchType): Promise<T> {
-  try {
-    const url = `${BACKEND_URL}${apiRoutes}${id ? `/${id}` : ""}`;
-    const headers: Record<string, string> = {};
+export async function uploadFile<T>(
+  apiRoutes: ApiRoutes,
+  formData: FormData,
+  id?: string,
+  params?: Record<string, any>,
+): Promise<T> {
+  const url = `${BACKEND_URL}${apiRoutes}${id ? `/${id}` : ""}`;
 
-    headers["Content-Type"] = "application/json";
+  const config: AxiosRequestConfig = {
+    url,
+    method: "post",
+    headers: { "Content-Type": "multipart/form-data" },
+    data: formData,
+    params,
+    responseType: "json",
+    withCredentials: false,
+  };
 
-    const config: AxiosRequestConfig = {
-      method,
-      url,
-      withCredentials: false,
-      headers,
-      data,
-    };
+  const response: AxiosResponse<T> = await axios(config);
+  return response.data;
+}
 
-    if (fileName) {
-      config.params = {
-        path: fileName,
-      };
-    }
+export async function downloadFile(
+  id?: string,
+  responseType: AxiosRequestConfig["responseType"] = "blob",
+): Promise<Blob | ArrayBuffer> {
+  const url = `${BACKEND_URL}/files/${id ? `/${id}` : ""}`;
 
-    if (multipartFormData) {
-      headers["Content-Type"] = "multipart/form-data";
-      config.data = data;
-    } else {
-      headers["Content-Type"] = "application/json";
-      config.data = JSON.stringify(data);
-    }
+  const config: AxiosRequestConfig = {
+    url,
+    method: "get",
+    headers: {},
+    responseType,
+    withCredentials: false,
+  };
 
-    const response: AxiosResponse<T> = await axios(config);
-    return response.data;
-  } catch (error: unknown) {
-    if (axios.isAxiosError(error)) {
-      const errMsg = error.response?.data || error.message;
-      console.error("Axios error:", errMsg);
-      throw errMsg;
-    } else if (error instanceof Error) {
-      console.error("Generic error:", error.message);
-      throw error.message;
-    } else {
-      console.error("Unknown error:", error);
-      throw String(error);
-    }
-  }
+  const response: AxiosResponse<Blob | ArrayBuffer> = await axios(config);
+  return response.data;
+}
+
+export async function downloadFolder(
+  pathName?: string,
+  responseType: AxiosRequestConfig["responseType"] = "blob",
+): Promise<Blob | ArrayBuffer> {
+  const url = `${BACKEND_URL}/folder/${pathName ? `/${pathName}` : ""}`;
+
+  const config: AxiosRequestConfig = {
+    url,
+    method: "get",
+    headers: {},
+    responseType,
+    withCredentials: false,
+  };
+
+  const response: AxiosResponse<Blob | ArrayBuffer> = await axios(config);
+  return response.data;
 }
